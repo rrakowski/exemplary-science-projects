@@ -20,31 +20,31 @@ d_theta=(the2-the1)/thestep;
 
 % BBO - Sellmeier index equations from EKSMA (rounded from indexinfo site)
 
-	no  = sqrt(2.7405 + 0.0184 / (lambda1^2-0.0179) - 0.0155*lambda1^2); 
-    ne  = sqrt(2.3730 + 0.0128 / (lambda1^2-0.0156) - 0.0044*lambda1^2);
-    n2o = sqrt(2.7405 + 0.0184 / (lambda2^2-0.0179) - 0.0155*lambda2^2);
-    n2e = sqrt(2.3730 + 0.0128 / (lambda2^2-0.0156) - 0.0044*lambda2^2);    
+no  = sqrt(2.7405 + 0.0184 / (lambda1^2-0.0179) - 0.0155*lambda1^2); 
+ne  = sqrt(2.3730 + 0.0128 / (lambda1^2-0.0156) - 0.0044*lambda1^2);
+n2o = sqrt(2.7405 + 0.0184 / (lambda2^2-0.0179) - 0.0155*lambda2^2);
+n2e = sqrt(2.3730 + 0.0128 / (lambda2^2-0.0156) - 0.0044*lambda2^2);    
    
 % Angular acceptance angle
 
-    n2e_theta=sqrt(  1/((sin(theta)/(n2e)).^2+(cos(theta)/(n2o)).^2) ); % n2e - for phasematching angle 29.2 deg for 800/400 for BBO
+n2e_theta=sqrt(  1/((sin(theta)/(n2e)).^2+(cos(theta)/(n2o)).^2) ); % n2e - for phasematching angle 29.2 deg for 800/400 for BBO
     
-    dtheta=theta+d_theta;
-    dn_2e_theta= n2e_theta-sqrt(1/((sin(dtheta)/(n2e)).^2+(cos(dtheta)/(n2o)).^2));
+dtheta=theta+d_theta;
+dn_2e_theta= n2e_theta-sqrt(1/((sin(dtheta)/(n2e)).^2+(cos(dtheta)/(n2o)).^2));
     
-    double_theta=2*theta;
-    delta_theta=(lambda1/(2*100))*(((n2e_theta)^3)*((n2e)^-2-(n2o)^-2)*(sin(double_theta)))^-1    % [rad per 100 um]
+double_theta=2*theta;
+delta_theta=(lambda1/(2*100))*(((n2e_theta)^3)*((n2e)^-2-(n2o)^-2)*(sin(double_theta)))^-1    % [rad per 100 um]
     
-    % phasematching angle for type_I negative uniaxial crystals:
-    content=(((no.^-2)-(n2o.^-2))/((n2e.^-2)-(n2o.^-2))).^0.5;
-    theta_PM=asin(content)        % [rad] 
-    theta_PM_deg=asind(content)   % or [deg] 
+% phasematching angle for type_I negative uniaxial crystals:
+content=(((no.^-2)-(n2o.^-2))/((n2e.^-2)-(n2o.^-2))).^0.5;
+theta_PM=asin(content)        % [rad] 
+theta_PM_deg=asind(content)   % or [deg] 
     
-    % angle between propagation and optic axis 'c'  
-    theta=linspace(the1,the2,thestep); 
+% angle between propagation and optic axis 'c'  
+theta=linspace(the1,the2,thestep); 
 
-    % angular walk-off
-    ro_BBO=(1/n2e_theta)*(dn_2e_theta/d_theta)*1e3                              % [mrad]  
+% angular walk-off
+ro_BBO=(1/n2e_theta)*(dn_2e_theta/d_theta)*1e3                              % [mrad]  
     
 % Now compensate BBO's GVD using a calcite plate (CaCO3)   
 
@@ -64,25 +64,25 @@ n_2o_dlambda=sqrt( 1 +( 0.8559*(lambda2+lambda2*d_lambda)^2/((lambda2+lambda2*d_
 
 for k=1:length(theta)
 
-% n = f(theta) for extraordinary (e) @ 800&400 nm
-% n_e_theta=sqrt(1/((sin(theta)/(n_e))^2+(cos(theta)/(n_o))^2)); - not needed here
-n_2e_theta(k)=sqrt(1/((sin(theta(k))/(n_2e)).^2+(cos(theta(k))/(n_2o)).^2)); 
+	% n = f(theta) for extraordinary (e) @ 800&400 nm
+	% n_e_theta=sqrt(1/((sin(theta)/(n_e))^2+(cos(theta)/(n_o))^2)); - not needed here
+	n_2e_theta(k)=sqrt(1/((sin(theta(k))/(n_2e)).^2+(cos(theta(k))/(n_2o)).^2)); 
 
-% dn for 800 nm (o)
-dn_o = n_o-n_o_dlambda;
-dn_2e(k)= n_2e_theta(k)-sqrt(1/((sin(theta(k))/(n_2e_dlambda)).^2+(cos(theta(k))/(n_2o_dlambda)).^2));
+	% dn for 800 nm (o)
+	dn_o = n_o-n_o_dlambda;
+	dn_2e(k)= n_2e_theta(k)-sqrt(1/((sin(theta(k))/(n_2e_dlambda)).^2+(cos(theta(k))/(n_2o_dlambda)).^2));
 
-% Calcite compensation 400nm (e), 800nm (o)
-dn_dlambda_2e(k)=dn_2e(k)/(lambda2*d_lambda);                        
-dn_dlambda_o=dn_o/(lambda1*d_lambda); % for ordinary 800 nm not theta dependent
+	% Calcite compensation 400nm (e), 800nm (o)
+	dn_dlambda_2e(k)=dn_2e(k)/(lambda2*d_lambda);                        
+	dn_dlambda_o=dn_o/(lambda1*d_lambda); % for ordinary 800 nm not theta dependent
 
-% Calcite group velocity delay, [fs/100 microns]
-GVD(k)=(1/3)*1.e-12*(  (n_2e_theta(k)+lambda2*dn_dlambda_2e(k))-(n_o+lambda2*dn_dlambda_o)  )*1.e15; 
+	% Calcite group velocity delay, [fs/100 microns]
+	GVD(k)=(1/3)*1.e-12*(  (n_2e_theta(k)+lambda2*dn_dlambda_2e(k))-(n_o+lambda2*dn_dlambda_o)  )*1.e15; 
 
-% Walk-off for caclite as f(theta)
-dtheta(k)=theta(k)+d_theta;
-dn_2e_theta(k)=n_2e_theta(k)-sqrt(    1/((sin(dtheta(k))/(n_2e)).^2+(cos(dtheta(k))/(n_2o)).^2)   );
-ro_calcite(k)=(1/n_2e_theta(k))*(dn_2e_theta(k)/d_theta);  %in [rad]
+	% Walk-off for caclite as f(theta)
+	dtheta(k)=theta(k)+d_theta;
+	dn_2e_theta(k)=n_2e_theta(k)-sqrt(    1/((sin(dtheta(k))/(n_2e)).^2+(cos(dtheta(k))/(n_2o)).^2)   );
+	ro_calcite(k)=(1/n_2e_theta(k))*(dn_2e_theta(k)/d_theta);  %in [rad]
 end
 
 % Plots
